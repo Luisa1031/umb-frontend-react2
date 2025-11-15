@@ -18,7 +18,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --base=/umb-frontend-react2/",
     "preview": "vite preview"
   },
   "browserslist": [
