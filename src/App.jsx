@@ -1,23 +1,44 @@
 import React, { useState, useEffect } from "react";
 import "./styles.css";
 
-// URL de tu servicio de Render (AJUSTA SI ES DIFERENTE)
+// 🚨 URL de tu servicio de Render (AJUSTA SI ES DIFERENTE)
+// Esta es la URL de ejemplo que usaste: https://umb-web-taller-l5h5.onrender.com
 const API_URL = "https://umb-web-taller-l5h5.onrender.com";
 
+// Definición de tipos para las tareas
+/**
+ * @typedef {object} Tarea
+ * @property {number} id - ID único de la tarea.
+ * @property {string} titulo - Título de la tarea.
+ * @property {number} completada - 0 (no completada) o 1 (completada).
+ */
+
 export default function App() {
+  /** @type {[Tarea[], React.Dispatch<React.SetStateAction<Tarea[]>>]} */
   const [tareas, setTareas] = useState([]);
   const [nuevaTarea, setNuevaTarea] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // === (READ) OBTENER TODAS LAS TAREAS ===
+  // =========================================================
+  // CRUD: READ (OBTENER TODAS LAS TAREAS)
+  // =========================================================
   const fetchTareas = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+      /** @type {Tarea[]} */
       const data = await response.json();
       setTareas(data);
-    } catch (error) {
-      console.error("Error al obtener las tareas:", error);
+    } catch (err) {
+      console.error("Error al obtener tareas:", err);
+      setError(
+        "Error al cargar las tareas. Asegúrate de que el Backend de Render esté activo."
+      );
     } finally {
       setLoading(false);
     }
@@ -27,134 +48,151 @@ export default function App() {
     fetchTareas();
   }, []);
 
-  // === (CREATE) AÑADIR UNA NUEVA TAREA ===
-  const handleCrearTarea = async (e) => {
+  // =========================================================
+  // CRUD: CREATE (AÑADIR UNA NUEVA TAREA)
+  // =========================================================
+  const agregarTarea = async (e) => {
     e.preventDefault();
-    const tituloLimpio = nuevaTarea.trim();
-    if (!tituloLimpio) return;
+    if (!nuevaTarea.trim()) return;
 
     try {
       const response = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ titulo: tituloLimpio }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ titulo: nuevaTarea }),
       });
 
-      if (response.ok) {
-        setNuevaTarea("");
-        fetchTareas();
+      if (!response.ok) {
+        throw new Error("Fallo al agregar la tarea");
       }
-    } catch (error) {
-      console.error("Error al crear la tarea:", error);
+
+      // Recarga la lista después de agregar
+      await fetchTareas();
+      setNuevaTarea(""); // Limpia el input
+    } catch (err) {
+      console.error("Error al agregar tarea:", err);
+      setError("Error al crear tarea. Verifica la conexión con el Backend.");
     }
   };
 
-  // === (UPDATE) CAMBIAR ESTADO DE COMPLETADA (PUT) ===
-  const handleToggleCompletada = async (id, completadaActual) => {
+  // =========================================================
+  // CRUD: DELETE (ELIMINAR TAREA)
+  // =========================================================
+  const eliminarTarea = async (id, titulo) => {
+    if (!window.confirm(`¿Estás seguro de eliminar la tarea: "${titulo}"?`)) {
+      return;
+    }
+
+    try {
+      // Envía el ID en el query string para que el Backend lo procese
+      const response = await fetch(`${API_URL}?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Fallo al eliminar la tarea");
+      }
+
+      // Actualiza el estado localmente (más rápido)
+      setTareas(tareas.filter((t) => t.id !== id));
+    } catch (err) {
+      console.error("Error al eliminar tarea:", err);
+      setError("Error al eliminar tarea. Inténtalo de nuevo.");
+    }
+  };
+
+  // =========================================================
+  // CRUD: UPDATE (MARCAR/DESMARCAR TAREA COMO COMPLETADA)
+  // =========================================================
+  const toggleCompletada = async (tarea) => {
+    // Calcula el nuevo estado (1 si estaba en 0, 0 si estaba en 1)
+    const nuevoEstado = tarea.completada === 1 ? 0 : 1;
+
     try {
       const response = await fetch(API_URL, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          id: id,
-          completada: completadaActual == 1 ? 0 : 1,
+          id: tarea.id,
+          completada: nuevoEstado,
         }),
       });
 
-      if (response.ok) {
-        fetchTareas();
+      if (!response.ok) {
+        throw new Error("Fallo al actualizar el estado");
       }
-    } catch (error) {
-      console.error("Error al actualizar la tarea:", error);
+
+      // Actualiza el estado localmente
+      setTareas(
+        tareas.map((t) =>
+          t.id === tarea.id ? { ...t, completada: nuevoEstado } : t
+        )
+      );
+    } catch (err) {
+      console.error("Error al actualizar tarea:", err);
+      setError("Error al actualizar la tarea. Revisa el log del servidor.");
     }
   };
 
-  // === (DELETE) ELIMINAR UNA TAREA ===
-  const handleEliminarTarea = async (id) => {
-    if (!window.confirm("¿Estás seguro de que quieres eliminar esta tarea?"))
-      return;
-
-    try {
-      const response = await fetch(API_URL, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: id }),
-      });
-
-      if (response.ok) {
-        fetchTareas();
-      }
-    } catch (error) {
-      console.error("Error al eliminar la tarea:", error);
-    }
-  };
-
+  // =========================================================
+  // RENDERIZADO DEL COMPONENTE
+  // =========================================================
   return (
-    <div className="App max-w-xl mx-auto p-4 md:p-8 bg-white shadow-xl rounded-lg mt-10">
-      <h1 className="text-3xl font-bold text-center mb-6 text-indigo-700">
-        Lista de Tareas (React + PHP/MySQL)
-      </h1>
+    <div className="task-container">
+      <h1>Lista de Tareas (React + PHP/MySQL)</h1>
 
-      {/* Formulario para añadir tareas */}
-      <form onSubmit={handleCrearTarea} className="flex gap-2 mb-6">
+      {/* Formulario para Crear Tarea */}
+      <form onSubmit={agregarTarea} className="task-form">
         <input
           type="text"
+          placeholder="Escribe una nueva tarea..."
           value={nuevaTarea}
           onChange={(e) => setNuevaTarea(e.target.value)}
-          placeholder="Escribe una nueva tarea..."
-          className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+          aria-label="Nueva tarea"
         />
-        <button
-          type="submit"
-          disabled={!nuevaTarea.trim()}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 disabled:opacity-50"
-        >
-          Añadir
-        </button>
+        <button type="submit">Añadir</button>
       </form>
 
-      {/* Contenido de la lista */}
+      {/* Manejo de Estados */}
+      {error && <p className="error-message">{error}</p>}
+
       {loading ? (
-        <p className="text-center text-gray-500">Cargando tareas...</p>
+        <p className="loading">Cargando tareas...</p>
       ) : (
-        <ul className="space-y-3">
-          {tareas.length > 0 ? (
+        <ul className="task-list">
+          {tareas.length === 0 ? (
+            <p className="no-tasks">No hay tareas pendientes. ¡Añade una!</p>
+          ) : (
             tareas.map((tarea) => (
               <li
                 key={tarea.id}
-                className={`flex justify-between items-center p-3 rounded-lg border transition duration-150 ${
-                  tarea.completada == 1
-                    ? "bg-green-50 border-green-200"
-                    : "bg-gray-50 border-gray-200 hover:bg-white"
+                className={`task-item ${
+                  tarea.completada === 1 ? "completed" : ""
                 }`}
               >
-                {/* Título de la tarea (al hacer click, se cambia el estado) */}
+                {/* Título (Al hacer clic, cambia el estado) */}
                 <span
-                  onClick={() =>
-                    handleToggleCompletada(tarea.id, tarea.completada)
-                  }
-                  className={`cursor-pointer flex-grow text-lg ${
-                    tarea.completada == 1
-                      ? "line-through text-gray-500"
-                      : "text-gray-800"
-                  }`}
+                  className="task-title"
+                  onClick={() => toggleCompletada(tarea)}
                 >
                   {tarea.titulo}
                 </span>
 
-                {/* Botón para eliminar */}
+                {/* Botón de Eliminar */}
                 <button
-                  onClick={() => handleEliminarTarea(tarea.id)}
-                  className="ml-4 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-1 px-3 rounded-lg shadow-sm transition duration-150"
+                  onClick={() => eliminarTarea(tarea.id, tarea.titulo)}
+                  className="delete-btn"
+                  // Accesibilidad: importante para botones sin texto visible
+                  aria-label={`Eliminar tarea ${tarea.titulo}`}
                 >
                   Eliminar
                 </button>
               </li>
             ))
-          ) : (
-            <li className="text-center text-gray-500 p-4 border rounded-lg bg-white">
-              ¡Parece que no hay tareas! Empieza a añadir algunas.
-            </li>
           )}
         </ul>
       )}

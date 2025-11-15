@@ -1,7 +1,173 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/* Base y Centrado */
 body {
-  background-color: #f7f9fc;
+  font-family: "Inter", sans-serif;
+  background-color: #f4f7f6;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center; /* Centrar horizontalmente */
+  align-items: center; /* Centrar verticalmente */
+  min-height: 100vh;
+}
+
+/* Contenedor Principal */
+.task-container {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+h1 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+}
+
+/* Formulario de Nueva Tarea */
+.task-form {
+  display: flex;
+  margin-bottom: 25px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden; /* Para que el borde se vea uniforme */
+}
+
+.task-form input[type="text"] {
+  flex-grow: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+}
+
+.task-form button {
+  padding: 10px 15px;
+  background-color: #007bff; /* Azul primario */
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.task-form button:hover {
+  background-color: #0056b3;
+}
+
+.task-form button:active {
+  transform: scale(0.98);
+}
+
+/* Lista de Tareas */
+.task-list {
+  list-style: none;
+  padding: 0;
+}
+
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 5px;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.3s;
+}
+
+.task-item:last-child {
+  border-bottom: none;
+}
+
+.task-item:hover {
+  background-color: #f9f9f9;
+}
+
+.task-title {
+  flex-grow: 1;
+  margin-right: 15px;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+/* Estilo para Tareas Completadas */
+.completed .task-title {
+  text-decoration: line-through;
+  color: #999;
+}
+
+/* Botones de Acción */
+.delete-btn {
+  background: #dc3545; /* Rojo de peligro */
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
+}
+
+/* Estado de Carga y Mensajes */
+.loading,
+.no-tasks,
+.error-message {
+  text-align: center;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.loading,
+.no-tasks {
+  color: #666;
+  background-color: #e9ecef;
+}
+
+.error-message {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  margin-bottom: 15px;
+}
+
+/* Responsive (Diseño adaptable) */
+@media (max-width: 600px) {
+  .task-container {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  .task-form {
+    flex-direction: column;
+  }
+
+  .task-form input[type="text"],
+  .task-form button {
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+
+  .task-form button {
+    margin-bottom: 0;
+  }
+
+  .task-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .task-title {
+    margin-bottom: 8px;
+  }
 }
