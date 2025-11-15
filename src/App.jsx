@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-// Ya no necesitamos importar "./styles.css" si usas Tailwind CSS
+// El archivo styles.css está vacío/no se usa, así que lo mantenemos comentado.
 // import "./styles.css";
 
 // 🚨 URL de tu servicio de Render (AJUSTA SI ES DIFERENTE)
