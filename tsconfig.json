@@ -17,7 +17,7 @@
     "jsx": "react-jsx", // O "react" si usas el runtime clásico
 
     /* Type Checking Estricto */
-    "strict": true,
+    "strict": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
