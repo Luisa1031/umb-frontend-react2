@@ -24,7 +24,5 @@
   },
   // Asegúrate de incluir los archivos de tu proyecto
   "include": ["src"], 
-  "references": [
-    { "path": "./tsconfig.node.json" }
-  ]
+  
 }
