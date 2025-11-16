@@ -19,7 +19,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build --base=/umb-frontend-react2/",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
   },
   "browserslist": [
     ">0.2%",
