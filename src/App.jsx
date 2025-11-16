@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 // Importar estilos no es necesario si utilizas la CDN de Tailwind en index.html o PostCSS/Vite.
 
-// 🚨 URL de tu servicio de Render (AJUSTA SI ES DIFERENTE)
-const API_URL = "https://umb-web-taller-l5h5.onrender.com";
+const API_URL = "https://umb-web-taller-l5h5.onrender.com/index.php";
 
 // Definición de tipos para las tareas
 /**
